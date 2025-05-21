@@ -1,7 +1,9 @@
-package com.example.bookapi;
+package com.example.bookapi.model;
+
+import com.example.bookapi.dto.BookDTO;
 
 public class Book {
-    private String title;
+	private String title;
     private String author;
     private String isbn;
     private int year;
@@ -13,8 +15,13 @@ public class Book {
         this.year = year;
     }
 
+    // Getters
     public String getTitle() { return title; }
     public String getAuthor() { return author; }
     public String getIsbn() { return isbn; }
     public int getYear() { return year; }
+
+    public BookDTO toDTO() {
+        return new BookDTO(this.title, this.author);
+    }
 }
