@@ -1,50 +1,48 @@
 package com.example.bookapi.controller;
 
-import java.util.List;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.example.bookapi.dto.BookDTO;
-import com.example.bookapi.service.BookService;
-
+import com.example.bookapi.model.Book;
 import jakarta.validation.Valid;
-@RestController
-@RequestMapping("/books")
-public class BookController {
-	private final BookService bookService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-    // Constructor injection
-    public BookController(BookService bookService) {
-        this.bookService = bookService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/books")
+public class BookController {
+
+    private final List<Book> books = new ArrayList<>();
+
+    @GetMapping
+    public ResponseEntity<List<BookDTO>> getAllBooks() {
+        log.info("GET /api/books called - returning all books");
+        List<BookDTO> dtos = books.stream()
+            .map(Book::toDTO)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     @PostMapping
-    public ResponseEntity<String> addBook(@Valid @RequestBody BookDTO bookDTO) {
-        bookService.addBook(bookDTO);
-        return ResponseEntity.ok("Book added successfully");
+    public ResponseEntity<BookDTO> addBook(@Valid @RequestBody BookDTO bookDTO) {
+        log.info("POST /api/books called - adding book: {}", bookDTO);
+        Book newBook = new Book(bookDTO.getTitle(), bookDTO.getAuthor(), "N/A", 0);
+        books.add(newBook);
+        return new ResponseEntity<>(newBook.toDTO(), HttpStatus.CREATED);
     }
 
-    @GetMapping
-    public ResponseEntity<List<BookDTO>> getBooks() {
-        return ResponseEntity.ok(bookService.getAllBooks());
-    }
-    
     @GetMapping("/search")
-    public ResponseEntity<List<BookDTO>> searchBooksByAuthor(
-            @RequestParam(name = "author") String author) {
-
-        if (author == null || author.trim().isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        List<BookDTO> result = bookService.searchBooksByAuthor(author.trim());
+    public ResponseEntity<List<BookDTO>> searchBooks(@RequestParam("title") String title) {
+        log.info("GET /api/books/search called - searching for title containing '{}'", title);
+        List<BookDTO> result = books.stream()
+            .filter(book -> book.getTitle().toLowerCase().contains(title.toLowerCase()))
+            .map(Book::toDTO)
+            .collect(Collectors.toList());
         return ResponseEntity.ok(result);
     }
-
 }
