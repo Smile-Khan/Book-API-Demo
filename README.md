@@ -1,24 +1,20 @@
 # 📚 Book API (Spring Boot)
 
-This project is a simple Spring Boot REST API that returns a static list of books. It is designed as a demonstration of how to create and expose RESTful endpoints using Spring Boot.
+A simple RESTful API built with Spring Boot to manage books.  
+Features include:
+
+- Add new books with validation  
+- Retrieve all books  
+- Search books by title  
+- Clean logging with Lombok’s `@Slf4j`  
+- Consistent error handling and validation  
 
 ---
 
-## 📖 Project Description
+### Running the Application
 
-The application provides a single endpoint:
-
-GET /books
-
-
-When accessed, it returns a JSON response containing a list of hardcoded books. Each book object contains the following attributes:
-
-- `title` (String)
-- `author` (String)
-- `isbn` (String)
-- `year` (Integer)
-
----
+bash
+mvn spring-boot:run
 
 ## ⚙️ Prerequisites
 
@@ -58,28 +54,28 @@ http://localhost:8080/books
 You will receive a JSON response with book details.
 
 
-✅ Sample Output
+API Endpoints
+Method	Endpoint	Description	Request Body	Response
+GET	/api/books	Get all books	None	List of books (JSON)
+POST	/api/books	Add a new book	{ "title": "...", "author": "..." }	Created book (JSON)
+GET	/api/books/search	Search books by title	Query param: title	List of matching books
 
-[
-  {
-    "title": "The Hobbit",
-    "author": "J.R.R. Tolkien",
-    "isbn": "978-0261103344",
-    "year": 1937
-  },
-  {
-    "title": "1984",
-    "author": "George Orwell",
-    "isbn": "978-0451524935",
-    "year": 1949
-  },
-  {
-    "title": "To Kill a Mockingbird",
-    "author": "Harper Lee",
-    "isbn": "978-0061120084",
-    "year": 1960
-  }
-]
+
+Validation
+title and author are mandatory fields on book creation.
+
+If validation fails, API responds with status 400 Bad Request and details.
+
+Testing
+You can test the API manually using Postman:
+
+Import the provided Postman collection (BookAPI.postman_collection.json) to quickly access pre-configured requests.
+
+Run the requests against the running server at http://localhost:8080.
+
+
+Logging
+All controller methods include detailed logging using Lombok’s @Slf4j for easy debugging and monitoring.
 
 
 👤 Author
