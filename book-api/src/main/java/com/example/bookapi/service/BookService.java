@@ -1,45 +1,51 @@
 package com.example.bookapi.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.example.bookapi.model.Book;
+import com.example.bookapi.repository.BookRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.example.bookapi.dto.BookDTO;
-import com.example.bookapi.model.Book;
-
-import lombok.extern.slf4j.Slf4j;
+import java.util.Optional;
 
 @Service
 @Slf4j
 public class BookService {
 
-    private final List<Book> bookStore = new ArrayList<>();
+    private final BookRepository bookRepository;
 
-    // Adds a new book to the in-memory store
-    public void addBook(BookDTO bookDTO) {
-        Book book = new Book(bookDTO.getTitle(), bookDTO.getAuthor(), "AUTO-GEN-ISBN", 2024);
-        bookStore.add(book);
-        log.info("Book added: {}", book);
+    public BookService(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
     }
 
-    // Returns all books as DTOs
-    public List<BookDTO> getAllBooks() {
-        log.info("Fetching all books, total: {}", bookStore.size());
-        return bookStore.stream()
-                        .map(Book::toDTO)
-                        .toList();
+    // Save or update book
+    public Book save(Book book) {
+        Book saved = bookRepository.save(book);
+        log.info("Book saved/updated: {}", saved);
+        return saved;
     }
 
-    // Searches books by author name (case-insensitive, partial match)
-    public List<BookDTO> searchBooksByAuthor(String authorQuery) {
-        log.info("Searching books with author containing: {}", authorQuery);
-        List<BookDTO> results = bookStore.stream()
-                .filter(book -> book.getAuthor() != null &&
-                        book.getAuthor().toLowerCase().contains(authorQuery.toLowerCase()))
-                .map(Book::toDTO)
-                .toList();
-        log.info("Found {} books matching author query '{}'", results.size(), authorQuery);
-        return results;
+    // Get all books with pagination
+    public Page<Book> findAll(Pageable pageable) {
+        log.info("Fetching all books with pagination: {}", pageable);
+        return bookRepository.findAll(pageable);
+    }
+
+    // Search books by title and author with pagination
+    public Page<Book> searchBooks(String title, String author, Pageable pageable) {
+        log.info("Searching books by title '{}' and author '{}' with pagination: {}", title, author, pageable);
+        return bookRepository.findByTitleContainingIgnoreCaseAndAuthorContainingIgnoreCase(title, author, pageable);
+    }
+
+    // Find book by ID
+    public Optional<Book> findById(Long id) {
+        return bookRepository.findById(id);
+    }
+
+    // Delete book by ID
+    public void deleteById(Long id) {
+        bookRepository.deleteById(id);
+        log.info("Book deleted with id: {}", id);
     }
 }
